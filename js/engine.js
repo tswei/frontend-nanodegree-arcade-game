@@ -80,7 +80,8 @@ var Engine = (function(global) {
      */
     function update(dt) {
         updateEntities(dt);
-        // checkCollisions();
+        checkCollisions();
+        checkGoalLine();
     }
 
     /* This is called by the update function  and loops through all of the
@@ -90,11 +91,32 @@ var Engine = (function(global) {
      * the data/properties related to  the object. Do your drawing in your
      * render methods.
      */
+
+    function checkCollisions() {
+        allEnemies.forEach(function(enemy) {
+            if (enemy.y === player.y && Math.abs(enemy.x - player.x) < 70
+                ) {
+                player.lives -= 1;
+                reset();
+            }
+        })
+        
+    }
+
+    function checkGoalLine() {
+        if (player.y === 0) {
+            player.score += 100 * player.level;
+            player.level += 1;
+            reset();
+        }
+    }
+
     function updateEntities(dt) {
         allEnemies.forEach(function(enemy) {
             enemy.update(dt);
         });
         player.update();
+        items.update(dt);
     }
 
     /* This function initially draws the "game level", it will then call
@@ -160,7 +182,9 @@ var Engine = (function(global) {
      * those sorts of things. It's only called once by the init() method.
      */
     function reset() {
-        // noop
+        player.x = player.initx;
+        player.y = player.inity;
+        allEnemies = Populate(player.level);
     }
 
     /* Go ahead and load all of the images we know we're going to need to
@@ -168,6 +192,12 @@ var Engine = (function(global) {
      * all of these images are properly loaded our game will start.
      */
     Resources.load([
+        'images/Gem Green.png',
+        'images/Gem Blue.png',
+        'images/Gem Orange.png',
+        'images/Key.png',
+        'images/Heart.png',
+        'images/Rock.png',
         'images/stone-block.png',
         'images/water-block.png',
         'images/grass-block.png',
