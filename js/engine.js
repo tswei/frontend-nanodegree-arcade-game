@@ -100,6 +100,20 @@ var Engine = (function(global) {
                 reset();
             }
         })
+        if (items.displayed.length > 0) {
+            items.displayed.forEach(function(item, index) {
+                if (item.y === player.y && item.x === player.x) {
+                    if (item.value === 'invicible') {
+                        // implement invincibility
+                    } else if (item.value === 'life') {
+                        player.life += 1;
+                    } else {
+                        player.score += item.value * player.level;
+                    }
+                    items.displayed.splice(index, 1);
+                }
+            });
+        }
         
     }
 
@@ -170,11 +184,17 @@ var Engine = (function(global) {
         /* Loop through all of the objects within the allEnemies array and call
          * the render function you have defined.
          */
+       if (items.displayed.length > 0) {
+            items.displayed.forEach(function(item) {
+                item.render(); 
+            });
+        }
         allEnemies.forEach(function(enemy) {
             enemy.render();
         });
 
         player.render();
+ 
     }
 
     /* This function does nothing but it could have been a good place to
@@ -185,6 +205,7 @@ var Engine = (function(global) {
         player.x = player.initx;
         player.y = player.inity;
         allEnemies = Populate(player.level);
+        items.displayed = [];
     }
 
     /* Go ahead and load all of the images we know we're going to need to
@@ -198,6 +219,7 @@ var Engine = (function(global) {
         'images/Key.png',
         'images/Heart.png',
         'images/Rock.png',
+        'images/Star.png',
         'images/stone-block.png',
         'images/water-block.png',
         'images/grass-block.png',

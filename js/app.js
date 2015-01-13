@@ -77,15 +77,25 @@ var Item = function() {
     this.countdt = 0;
     // initializes item array and cdf
     this.cdf = [0.4, 0.6, 0.7, 0.74, 0.75, 0.8, 1];
-    this.itemcdf = [this.gemBlue, this.gemGreen, this.gemOrange,
-        this.key, this.heart, this.star, this.rock];
+    this.itemcdf = [GemBlue, GemGreen, GemOrange,
+        Key, Heart, Star, Rock];
+    this.displayed  = [];
 }
+
+Item.prototype = Object.create(Enemy.prototype);
+Item.prototype.constructor = Item;
 
 Item.prototype.update = function (dt) {
     // Weighted Random selection of possible items
     // Random time increment between item pops
+    this.displayed.forEach(function(item, index) {
+        item.count += dt;
+        if (item.count > 15) {
+            items.displayed.splice(index, 1);
+        }
+    });
     this.countdt += dt;
-    var threshold = (Math.random() * 10) + 5;
+    var threshold = (Math.random() * 10) + 10;
     if (this.countdt > threshold) {
         this.roulette();
         this.countdt = 0;
@@ -95,73 +105,97 @@ Item.prototype.update = function (dt) {
 
 Item.prototype.roulette = function() {
     var select = Math.random();
+    var temp
     for (var i = 0; i < this.cdf.length; i++) {
-        if (this.cdf[i] >= select) {
-            var fun = this.itemcdf[i];
-            this.fun();
-            console.log(this.sprite);
+        if (this.cdf[i] > select) {
+            temp = new this.itemcdf[i]
+            temp.location();
+            temp.count = 0;
+            this.displayed.push(temp);
+            return
         }
     }
 }
 
 Item.prototype.location = function () {
-    // places item at a random location
-
+    // creates random item location
+    this.x = (Math.floor(Math.random() * 6)) * 101;
+    this.y = (Math.floor(Math.random() * 3) + 1) * 83;
 }
-
 
 // Refactor to pull out rate of item and create
 // cdf from rates and automatically adjust random range
-Item.prototype.gemBlue = function() {
+var GemBlue = function() {
     // increases score
     this.sprite = "images/Gem Blue.png";
     this.value = 1;
     this.rate = 0.5;
 }
 
-Item.prototype.gemGreen = function() {
+GemBlue.prototype = Object.create(Item.prototype);
+GemBlue.prototype.constructor = GemBlue;
+
+var GemGreen = function() {
     // increases score
     this.sprite = "images/Gem Green.png";
     this.value = 2;
     this.rate = 0.2;
 }
 
-Item.prototype.gemOrange = function() {
+GemGreen.prototype = Object.create(Item.prototype);
+GemGreen.prototype.constructor = GemGreen;
+
+var GemOrange = function() {
     // increases score
     this.sprite = "images/Gem Orange.png";
     this.value = 5;
     this.rate = 0.1;
 }
 
-Item.prototype.key = function() {
+GemOrange.prototype =  Object.create(Item.prototype);
+GemOrange.prototype.constructor = GemOrange;
+
+var Key = function() {
     // increases score
     this.sprite = "images/Key.png";
     this.value = 50;
     this.rate = 0.04;
 }
 
-Item.prototype.heart = function() {
+Key.prototype = Object.create(Item.prototype);
+Key.prototype.constructor = Key;
+
+var Heart = function() {
     // Adds a life
     this.sprite = "images/Heart.png";
     this.value = "life";
     this.rate = 0.01;
 }
 
-Item.prototype.star = function() {
+Heart.prototype = Object.create(Item.prototype);
+Heart.prototype.constructor = Heart;
+
+var Star = function() {
     // Adds invulnerability
     this.sprite = "images/Star.png";
     this.value = "invincible";
     this.rate = 0.05;
 }
 
-Item.prototype.rock = function() {
+Star.prototype = Object.create(Item.prototype);
+Star.prototype.constructor = Star;
+
+var Rock = function() {
     // decreases score
     this.sprite = "images/Rock.png";
     this.value = -2;
     this.rate = 0.2;
 }
 
-// Refactor into Enemy.protoype
+Rock.prototype = Object.create(Item.prototype);
+Rock.prototype.constructor = Rock;
+
+// Refactor into Enemy.protoype if possible
 var Populate = function(level) {
     var result = [];
     var limit = 2;
@@ -173,7 +207,7 @@ var Populate = function(level) {
     return result;
 }
 
-// Refactor into Enemy.protoype
+// Refactor into Enemy.protoype if possible
 var addNew = function(row, num, limit) {
     var enemy = new Enemy;
     enemy.y = (row + 1) * enemy.inity;
@@ -191,7 +225,6 @@ var allEnemies = Populate(player.level);
 
 // Create items object
 var items = new Item;
-console.log(new Item);
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
