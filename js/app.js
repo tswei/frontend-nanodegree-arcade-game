@@ -1,21 +1,13 @@
 // Enemies our player must avoid
 var Enemy = function() {
-    // Variables applied to each of our instances go here,
-    // we've provided one for you to get started
-
-    // The image/sprite for our enemies, this uses
-    // a helper we've provided to easily load images
+    // Initializes enemy with start positions and sprite image
     this.sprite = 'images/enemy-bug.png';
     this.initx = 101;
     this.inity = 83;
 }
 
-// Update the enemy's position, required method for game
-// Parameter: dt, a time delta between ticks
 Enemy.prototype.update = function(dt) {
-    // You should multiply any movement by the dt parameter
-    // which will ensure the game runs at the same speed for
-    // all computers.
+    // Updates enemy positions with time increment (dt)
     dt *= (player.level % 3) + 1;
     if (this.y % 2 === 1) {
         if (this.x < this.initx * 6) {
@@ -32,34 +24,52 @@ Enemy.prototype.update = function(dt) {
     }
 }
 
-// Draw the enemy on the screen, required method for game
 Enemy.prototype.render = function() {
+    // Render sprite image on screen
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+    ctx.font = "15px Serif";
+    ctx.strokeStyle = "white";
+    ctx.fillStyle = "black";
+
+    if (this.lives) {
+        ctx.textAlign = "right";
+        ctx.strokeText("LIVES : " + this.lives, 480, 575);
+        ctx.fillText("LIVES : " + this.lives, 480, 575);
+    }
+    if (this.score >= 0) {
+        ctx.textAlign = "left";
+        ctx.strokeText("SCORE : " + this.score, 25, 575);
+        ctx.fillText("SCORE : " + this.score, 25, 575);
+    }
 }
 
-// Now write your own player class
-// This class requires an update(), render() and
-// a handleInput() method.
+// Player object controlled by keyboard input
 var Player = function() {
-    // Initialize player at middle of the bottom edge of the
-    // board.
+    // Initialize with start position, sprite image, and initial conditions
     this.sprite = 'images/char-boy.png'
     this.initx = 101*2;
     this.inity = 83*5;
     this.lives = 3;
     this.score = 0;
     this.level = 1;
+    this.invincible = false;
+    this.invinciblereset = 0;
 }
 
 Player.prototype = Object.create(Enemy.prototype);
 Player.prototype.constructor = Player;
 
 Player.prototype.update = function(dt) {
-    //pass
+    // Sets timeout on invincibility
+    if (this.invinciblereset > 0) {
+        this.invinciblereset -= dt;
+    } else {
+        this.invincible = false;
+    }
 }
 
 Player.prototype.handleInput = function(n) {
-    // moves player by tile and restricts movement on border
+    // moves player tile by tile and restricts movement past border
     if (n==='left' && this.x > 0) {
         this.x -= 101;
     } else if (n==='right' && this.x < 101*4) {
@@ -73,7 +83,7 @@ Player.prototype.handleInput = function(n) {
 
 // Create Item objects to augment play
 var Item = function() {
-    // initializes count
+    // initializes count before items appear
     this.countdt = 0;
     // initializes item array and cdf
     this.cdf = [0.4, 0.6, 0.7, 0.74, 0.75, 0.8, 1];
@@ -85,9 +95,9 @@ var Item = function() {
 Item.prototype = Object.create(Enemy.prototype);
 Item.prototype.constructor = Item;
 
-Item.prototype.update = function (dt) {
-    // Weighted Random selection of possible items
+Item.prototype.update = function(dt) {
     // Random time increment between item pops
+    // Removal of items from board after duration
     this.displayed.forEach(function(item, index) {
         item.count += dt;
         if (item.count > 15) {
@@ -104,6 +114,7 @@ Item.prototype.update = function (dt) {
 }
 
 Item.prototype.roulette = function() {
+    // Weighted Random selection of possible items
     var select = Math.random();
     var temp
     for (var i = 0; i < this.cdf.length; i++) {
@@ -117,10 +128,23 @@ Item.prototype.roulette = function() {
     }
 }
 
-Item.prototype.location = function () {
+Item.prototype.location = function() {
     // creates random item location
-    this.x = (Math.floor(Math.random() * 6)) * 101;
-    this.y = (Math.floor(Math.random() * 3) + 1) * 83;
+    var itemx, itemy;
+    var repeatx = true;
+    var repeaty = true;
+    while (repeatx && repeaty) {
+        itemx = (Math.floor(Math.random() * 6)) * 101;
+        if (Math.abs(player.x - itemx) > 101) {
+            this.x = itemx;
+            repeatx = false;
+        }
+        itemy = (Math.floor(Math.random() * 3) + 1) * 83;
+        if (Math.abs(player.y - itemy) > 83) {
+            this.y = itemy;
+            repeaty = false;
+        }
+    }
 }
 
 // Refactor to pull out rate of item and create
@@ -215,16 +239,42 @@ var addNew = function(row, num, limit) {
     return enemy;
 }
 
+// Creates level object to notify level increase
+var Level = function() {
+    this.level = player.level;
+    this.dtinit = Math.PI;
+    this.px = 0;
+}
+
+Level.prototype.update = function(dt) {
+    this.dtinit -= dt;
+    this.px = 48 * Math.abs(Math.sin(Math.PI - this.dtinit));
+}
+
+Level.prototype.render = function(text) {
+    if (this.px > 0) {
+        ctx.textAlign = "center";
+        ctx.font = this.px + "px Serif";
+        ctx.lineWidth = 3.0;
+        ctx.strokeStyle = "white";
+        ctx.fillStyle = "black";
+        ctx.strokeText(text, 505/2, 606/2);
+        ctx.fillText(text, 505/2, 606/2);
+    };
+}
+
 // Now instantiate your objects.
 // Place the player object in a variable called player
 var player = new Player;
-
 
 // Place all enemy objects in an array called allEnemies
 var allEnemies = Populate(player.level);
 
 // Create items object
 var items = new Item;
+
+// Initialize level notification
+var level = new Level;
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.

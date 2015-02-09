@@ -94,19 +94,21 @@ var Engine = (function(global) {
 
     function checkCollisions() {
         allEnemies.forEach(function(enemy) {
-            if (enemy.y === player.y && Math.abs(enemy.x - player.x) < 70
-                ) {
-                player.lives -= 1;
-                reset();
+            if (player.invincible === false) {
+                if (enemy.y === player.y && Math.abs(enemy.x - player.x) < 70) {
+                    player.lives -= 1;
+                    reset();
+                }
             }
         })
         if (items.displayed.length > 0) {
             items.displayed.forEach(function(item, index) {
                 if (item.y === player.y && item.x === player.x) {
-                    if (item.value === 'invicible') {
-                        // implement invincibility
+                    if (item.value === 'invincible') {
+                        player.invincible = true;
+                        player.invinciblereset = 15;
                     } else if (item.value === 'life') {
-                        player.life += 1;
+                        player.lives += 1;
                     } else {
                         player.score += item.value * player.level;
                     }
@@ -119,18 +121,27 @@ var Engine = (function(global) {
 
     function checkGoalLine() {
         if (player.y === 0) {
-            player.score += 100 * player.level;
+            player.score += 10 * player.level;
             player.level += 1;
+            levelIncrease();
+            allEnemies = Populate(player.level);
             reset();
         }
+    }
+
+    function levelIncrease() {
+        level = new Level;
     }
 
     function updateEntities(dt) {
         allEnemies.forEach(function(enemy) {
             enemy.update(dt);
         });
-        player.update();
-        items.update(dt);
+        player.update(dt);
+        if (player.level > 2) {
+            items.update(dt);
+        }
+        level.update(dt);
     }
 
     /* This function initially draws the "game level", it will then call
@@ -194,24 +205,33 @@ var Engine = (function(global) {
         });
 
         player.render();
- 
+        if (player.lives === 0) {
+            level.render("GAME OVER");
+        } else if (level.dtinit > 0) {
+            level.render("LEVEL " + level.level);
+        }
+        
     }
 
-    /* This function does nothing but it could have been a good place to
-     * handle game reset states - maybe a new game menu or a game over screen
-     * those sorts of things. It's only called once by the init() method.
-     */
     function reset() {
-        player.x = player.initx;
-        player.y = player.inity;
-        allEnemies = Populate(player.level);
-        items.displayed = [];
+        // Ends game if out of lives else resets
+        if (player.lives === 0) {
+            player.x = player.initx;
+            player.y = player.inity;
+            // gameMenu();
+        } else {
+            player.x = player.initx;
+            player.y = player.inity;
+            items.displayed = [];
+        }
     }
 
-    /* Go ahead and load all of the images we know we're going to need to
-     * draw our game level. Then set init as the callback method, so that when
-     * all of these images are properly loaded our game will start.
-     */
+    function gameMenu() {
+        renderEntities();
+        win.requestAnimationFrame(gameMenu);
+    }
+
+    // Loads all images and sets init as the callback method
     Resources.load([
         'images/Gem Green.png',
         'images/Gem Blue.png',
