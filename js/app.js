@@ -31,6 +31,8 @@ Enemy.prototype.render = function() {
     ctx.strokeStyle = "white";
     ctx.fillStyle = "black";
 
+
+    // Renders Life and Score count on screen
     if (this.lives) {
         ctx.textAlign = "right";
         ctx.strokeText("LIVES : " + this.lives, 480, 575);
@@ -81,7 +83,7 @@ Player.prototype.handleInput = function(n) {
     }
 }
 
-// Create Item objects to augment play
+// Creates collectable Item objects to augment play
 var Item = function() {
     // initializes count before items appear
     this.countdt = 0;
@@ -100,12 +102,12 @@ Item.prototype.update = function(dt) {
     // Removal of items from board after duration
     this.displayed.forEach(function(item, index) {
         item.count += dt;
-        if (item.count > 15) {
+        if (item.count > 10) {
             items.displayed.splice(index, 1);
         }
     });
     this.countdt += dt;
-    var threshold = (Math.random() * 10) + 10;
+    var threshold = (Math.random() * 5) + 2;
     if (this.countdt > threshold) {
         this.roulette();
         this.countdt = 0;
@@ -147,8 +149,7 @@ Item.prototype.location = function() {
     }
 }
 
-// Refactor to pull out rate of item and create
-// cdf from rates and automatically adjust random range
+// Item Objects called by array itemcdf
 var GemBlue = function() {
     // increases score
     this.sprite = "images/Gem Blue.png";
@@ -219,7 +220,6 @@ var Rock = function() {
 Rock.prototype = Object.create(Item.prototype);
 Rock.prototype.constructor = Rock;
 
-// Refactor into Enemy.protoype if possible
 var Populate = function(level) {
     var result = [];
     var limit = 2;
@@ -231,7 +231,6 @@ var Populate = function(level) {
     return result;
 }
 
-// Refactor into Enemy.protoype if possible
 var addNew = function(row, num, limit) {
     var enemy = new Enemy;
     enemy.y = (row + 1) * enemy.inity;

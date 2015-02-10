@@ -13,7 +13,6 @@
  * the canvas' context (ctx) object globally available to make writing app.js
  * a little simpler to work with.
  */
-
 var Engine = (function(global) {
     /* Predefine the variables we'll be using within this scope,
      * create the canvas element, grab the 2D context for that canvas
@@ -45,6 +44,7 @@ var Engine = (function(global) {
         /* Call our update/render functions, pass along the time delta to
          * our update function since it may be used for smooth animation.
          */
+
         update(dt);
         render();
 
@@ -93,6 +93,7 @@ var Engine = (function(global) {
      */
 
     function checkCollisions() {
+        // Checks if player position intercepts Enemies or Items
         allEnemies.forEach(function(enemy) {
             if (player.invincible === false) {
                 if (enemy.y === player.y && Math.abs(enemy.x - player.x) < 70) {
@@ -120,6 +121,7 @@ var Engine = (function(global) {
     }
 
     function checkGoalLine() {
+        // Determines if Player has reached goal and awards new level
         if (player.y === 0) {
             player.score += 10 * player.level;
             player.level += 1;
@@ -130,14 +132,18 @@ var Engine = (function(global) {
     }
 
     function levelIncrease() {
+        // Resets level to display current, new, level
         level = new Level;
     }
 
     function updateEntities(dt) {
+        // Updates all entities positions
         allEnemies.forEach(function(enemy) {
             enemy.update(dt);
         });
         player.update(dt);
+
+        // Displays items only after level 2
         if (player.level > 2) {
             items.update(dt);
         }
@@ -183,8 +189,10 @@ var Engine = (function(global) {
             }
         }
 
-
         renderEntities();
+        if (player.lives <= 0) {
+            level.render("GAME OVER");
+        }
     }
 
     /* This function is called by the render function and is called on each game
@@ -204,32 +212,25 @@ var Engine = (function(global) {
             enemy.render();
         });
 
-        player.render();
-        if (player.lives === 0) {
-            level.render("GAME OVER");
-        } else if (level.dtinit > 0) {
+        // Skips player render at GAME OVER
+        if (player.lives > 0) {
+            player.render();
+        }
+        // Displays one cycle of level notification
+        if (level.dtinit > 0) {
             level.render("LEVEL " + level.level);
         }
         
     }
 
     function reset() {
-        // Ends game if out of lives else resets
-        if (player.lives === 0) {
-            player.x = player.initx;
-            player.y = player.inity;
-            // gameMenu();
-        } else {
-            player.x = player.initx;
-            player.y = player.inity;
-            items.displayed = [];
-        }
+        // Resets player position
+        player.x = player.initx;
+        player.y = player.inity;
+        items.displayed = [];
     }
 
-    function gameMenu() {
-        renderEntities();
-        win.requestAnimationFrame(gameMenu);
-    }
+
 
     // Loads all images and sets init as the callback method
     Resources.load([
