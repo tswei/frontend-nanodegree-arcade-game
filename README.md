@@ -8,9 +8,13 @@ for self-checking their submission.
 ### Running Application
 
 open browser window to file:///C:/PATH/index.html
-Game will begin automatically
+
+Game will begin automatically.
+
 Use mouse keys to avoid enemy bugs and reach the goal line at the top!
+
 Collect items after level 2 to increase your score, lives, or make you invicible!
+
 Beware of Rocks! They decrease your score!!
 
 Refresh page to restart from GAME OVER.
