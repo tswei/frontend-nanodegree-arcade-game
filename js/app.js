@@ -4,7 +4,7 @@ var Enemy = function() {
     this.sprite = 'images/enemy-bug.png';
     this.initx = 101;
     this.inity = 83;
-}
+};
 
 Enemy.prototype.update = function(dt) {
     // Updates enemy positions with time increment (dt)
@@ -13,7 +13,7 @@ Enemy.prototype.update = function(dt) {
         if (this.x < this.initx * 6) {
             this.x += this.initx * dt * this.inity / this.y;
         } else {
-            this.x = -this.initx
+            this.x = -this.initx;
         }
     } else {
         if (this.x > -this.initx) {
@@ -22,7 +22,7 @@ Enemy.prototype.update = function(dt) {
             this.x = this.initx * 6;
         }
     }
-}
+};
 
 Enemy.prototype.render = function() {
     // Render sprite image on screen
@@ -43,12 +43,12 @@ Enemy.prototype.render = function() {
         ctx.strokeText("SCORE : " + this.score, 25, 575);
         ctx.fillText("SCORE : " + this.score, 25, 575);
     }
-}
+};
 
 // Player object controlled by keyboard input
 var Player = function() {
     // Initialize with start position, sprite image, and initial conditions
-    this.sprite = 'images/char-boy.png'
+    this.sprite = 'images/char-boy.png';
     this.initx = 101*2;
     this.inity = 83*5;
     this.lives = 3;
@@ -56,7 +56,7 @@ var Player = function() {
     this.level = 1;
     this.invincible = false;
     this.invinciblereset = 0;
-}
+};
 
 Player.prototype = Object.create(Enemy.prototype);
 Player.prototype.constructor = Player;
@@ -68,7 +68,7 @@ Player.prototype.update = function(dt) {
     } else {
         this.invincible = false;
     }
-}
+};
 
 Player.prototype.handleInput = function(n) {
     // moves player tile by tile and restricts movement past border
@@ -81,7 +81,7 @@ Player.prototype.handleInput = function(n) {
     } else if (n==='down' && this.y < 83*5) {
         this.y += 83;
     }
-}
+};
 
 // Creates collectable Item objects to augment play
 var Item = function() {
@@ -92,7 +92,7 @@ var Item = function() {
     this.itemcdf = [GemBlue, GemGreen, GemOrange,
         Key, Heart, Star, Rock];
     this.displayed  = [];
-}
+};
 
 Item.prototype = Object.create(Enemy.prototype);
 Item.prototype.constructor = Item;
@@ -112,23 +112,22 @@ Item.prototype.update = function(dt) {
         this.roulette();
         this.countdt = 0;
     }
-
-}
+};
 
 Item.prototype.roulette = function() {
     // Weighted Random selection of possible items
     var select = Math.random();
-    var temp
+    var temp;
     for (var i = 0; i < this.cdf.length; i++) {
         if (this.cdf[i] > select) {
-            temp = new this.itemcdf[i]
+            temp = new this.itemcdf[i]();
             temp.location();
             temp.count = 0;
             this.displayed.push(temp);
-            return
+            return;
         }
     }
-}
+};
 
 Item.prototype.location = function() {
     // creates random item location
@@ -147,7 +146,7 @@ Item.prototype.location = function() {
             repeaty = false;
         }
     }
-}
+};
 
 // Item Objects called by array itemcdf
 var GemBlue = function() {
@@ -155,7 +154,7 @@ var GemBlue = function() {
     this.sprite = "images/Gem Blue.png";
     this.value = 1;
     this.rate = 0.5;
-}
+};
 
 GemBlue.prototype = Object.create(Item.prototype);
 GemBlue.prototype.constructor = GemBlue;
@@ -165,7 +164,7 @@ var GemGreen = function() {
     this.sprite = "images/Gem Green.png";
     this.value = 2;
     this.rate = 0.2;
-}
+};
 
 GemGreen.prototype = Object.create(Item.prototype);
 GemGreen.prototype.constructor = GemGreen;
@@ -175,7 +174,7 @@ var GemOrange = function() {
     this.sprite = "images/Gem Orange.png";
     this.value = 5;
     this.rate = 0.1;
-}
+};
 
 GemOrange.prototype =  Object.create(Item.prototype);
 GemOrange.prototype.constructor = GemOrange;
@@ -185,7 +184,7 @@ var Key = function() {
     this.sprite = "images/Key.png";
     this.value = 50;
     this.rate = 0.04;
-}
+};
 
 Key.prototype = Object.create(Item.prototype);
 Key.prototype.constructor = Key;
@@ -195,7 +194,7 @@ var Heart = function() {
     this.sprite = "images/Heart.png";
     this.value = "life";
     this.rate = 0.01;
-}
+};
 
 Heart.prototype = Object.create(Item.prototype);
 Heart.prototype.constructor = Heart;
@@ -205,7 +204,7 @@ var Star = function() {
     this.sprite = "images/Star.png";
     this.value = "invincible";
     this.rate = 0.05;
-}
+};
 
 Star.prototype = Object.create(Item.prototype);
 Star.prototype.constructor = Star;
@@ -215,7 +214,7 @@ var Rock = function() {
     this.sprite = "images/Rock.png";
     this.value = -2;
     this.rate = 0.2;
-}
+};
 
 Rock.prototype = Object.create(Item.prototype);
 Rock.prototype.constructor = Rock;
@@ -229,26 +228,26 @@ var Populate = function(level) {
         }
     }
     return result;
-}
+};
 
 var addNew = function(row, num, limit) {
-    var enemy = new Enemy;
+    var enemy = new Enemy();
     enemy.y = (row + 1) * enemy.inity;
     enemy.x = ((707 / limit) * num);
     return enemy;
-}
+};
 
 // Creates level object to notify level increase
 var Level = function() {
     this.level = player.level;
     this.dtinit = Math.PI;
     this.px = 0;
-}
+};
 
 Level.prototype.update = function(dt) {
     this.dtinit -= dt;
     this.px = 48 * Math.abs(Math.sin(Math.PI - this.dtinit));
-}
+};
 
 Level.prototype.render = function(text) {
     if (this.px > 0) {
@@ -259,21 +258,21 @@ Level.prototype.render = function(text) {
         ctx.fillStyle = "black";
         ctx.strokeText(text, 505/2, 606/2);
         ctx.fillText(text, 505/2, 606/2);
-    };
-}
+    }
+};
 
 // Now instantiate your objects.
 // Place the player object in a variable called player
-var player = new Player;
+var player = new Player();
 
 // Place all enemy objects in an array called allEnemies
 var allEnemies = Populate(player.level);
 
 // Create items object
-var items = new Item;
+var items = new Item();
 
 // Initialize level notification
-var level = new Level;
+var level = new Level();
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.

@@ -57,7 +57,7 @@ var Engine = (function(global) {
          * function again as soon as the browser is able to draw another frame.
          */
         win.requestAnimationFrame(main);
-    };
+    }
 
     /* This function does some initial setup that should only occur once,
      * particularly setting the lastTime variable that is required for the
@@ -101,7 +101,7 @@ var Engine = (function(global) {
                     reset();
                 }
             }
-        })
+        });
         if (items.displayed.length > 0) {
             items.displayed.forEach(function(item, index) {
                 if (item.y === player.y && item.x === player.x) {
@@ -133,7 +133,7 @@ var Engine = (function(global) {
 
     function levelIncrease() {
         // Resets level to display current, new, level
-        level = new Level;
+        level = new Level();
     }
 
     function updateEntities(dt) {
